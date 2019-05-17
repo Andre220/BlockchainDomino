@@ -5,10 +5,7 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
-    path: Assets/Scenes/BlockchainTester.unity
-    guid: cbf97c7246acb8c489c289696a2e03f4
   - enabled: 1
-    path: Assets/Scenes/ConnectionTest.unity
+    path: Assets/Scenes/Tests/ConnectionTest.unity
     guid: fe10387b105eace45ba4c44a73cb82d7
   m_configObjects: {}

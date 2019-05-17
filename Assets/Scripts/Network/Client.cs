@@ -3,15 +3,18 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 
 public class Client : MonoBehaviour
 {
     //public static Client instance = null;
 
-    private const int MAX_CONNECTION = 15;
+    public Text ClientDebugText;
+
+    private const int MAX_CONNECTION = 2;
 
     public int portToConnect;
-    //private int myPort;
+    private int myPort;
 
     private int hostId;
     private int connectionID;
@@ -28,9 +31,9 @@ public class Client : MonoBehaviour
         /*if (instance == null)
             instance = this;
         else if (instance != null)
-            Destroy(gameObject);
+            Destroy(gameObject);*/
 
-        myPort = Server.instance.port;*/
+        //myPort = Server.instance.port;
 
         NetworkTransport.Init();
         ConnectionConfig cc = new ConnectionConfig();
@@ -55,10 +58,7 @@ public class Client : MonoBehaviour
         int dataSize;
         byte error;
 
-
-        //sendMessageToServer("Sending message from node at port " + myPort + " to node at port " + portToConnect);
-        //sendMessageToServer("Sending message from node at port " + "||" + " to node at port " + portToConnect);
-        sendMessageToServer("Sending message from node at port " + "||" + " to node at port");
+        sendMessageToServer("Sending message from node at port " + Server.hostingPort + "||" + " to node at port" + portToConnect);
 
         NetworkEventType recData = NetworkTransport.Receive(out recHostId, out connectionId, out channelId, recBuffer, bufferSize, out dataSize, out error);
 

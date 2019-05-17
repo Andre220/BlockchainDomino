@@ -8,11 +8,11 @@ public class Server : MonoBehaviour
 {
     //public IList<int> KnowNodes; //Here i storage the nodes (the port value) of any node that already connect to me;
 
-    //public static Server instance = null;
+    public static Server instance = null;
 
-    private const int MAX_CONNECTION = 15;
+    private const int MAX_CONNECTION = 2;
 
-    public int port;//Default port is 23500
+    public static int hostingPort = 23501;//Default port is 23500
 
     private int hostId;
 
@@ -23,12 +23,12 @@ public class Server : MonoBehaviour
 
     private void Start()
     {
-        /*if (instance == null)
+        if (instance == null)
             instance = this;
         else if (instance != null)
             Destroy(gameObject);
 
-        KnowNodes = new List<int>();*/
+        /*KnowNodes = new List<int>();*/
 
         NetworkTransport.Init();
         ConnectionConfig cc = new ConnectionConfig();
@@ -38,7 +38,7 @@ public class Server : MonoBehaviour
 
         HostTopology topo = new HostTopology(cc, MAX_CONNECTION);
 
-        hostId = NetworkTransport.AddHost(topo, port, null);// the ip is null because we are at localhost - i should test it with 127.0.0.1 to see how it behave
+        hostId = NetworkTransport.AddHost(topo, hostingPort, null);// the ip is null because we are at localhost - i should test it with 127.0.0.1 to see how it behave
     }
 
     private void Update()
@@ -77,5 +77,3 @@ public class Server : MonoBehaviour
         }
     }
 }
-/*
-*/
