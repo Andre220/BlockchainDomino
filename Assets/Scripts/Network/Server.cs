@@ -6,13 +6,15 @@ using UnityEngine.Networking;
 
 public class Server : MonoBehaviour
 {
-    //public IList<int> KnowNodes; //Here i storage the nodes (the port value) of any node that already connect to me;
+    public IList<int> KnowNodes; //Here i storage the nodes (the port value) of any node that already connect to me;
+
+    public bool isPlaying = false;
 
     public static Server instance = null;
 
-    private const int MAX_CONNECTION = 2;
+    private const int MAX_CONNECTION = 125;
 
-    public static int hostingPort = 23501;//Default port is 23500
+    public int serverPort;//Default port is 23500
 
     private int hostId;
 
@@ -28,7 +30,7 @@ public class Server : MonoBehaviour
         else if (instance != null)
             Destroy(gameObject);
 
-        /*KnowNodes = new List<int>();*/
+        KnowNodes = new List<int>();
 
         NetworkTransport.Init();
         ConnectionConfig cc = new ConnectionConfig();
@@ -38,7 +40,7 @@ public class Server : MonoBehaviour
 
         HostTopology topo = new HostTopology(cc, MAX_CONNECTION);
 
-        hostId = NetworkTransport.AddHost(topo, hostingPort, null);// the ip is null because we are at localhost - i should test it with 127.0.0.1 to see how it behave
+        hostId = NetworkTransport.AddHost(topo, serverPort, null);// the ip is null because we are at localhost - i should test it with 127.0.0.1 to see how it behave
     }
 
     private void Update()
@@ -60,7 +62,8 @@ public class Server : MonoBehaviour
 
             case NetworkEventType.ConnectEvent:
                 string connectEventMsg = Encoding.Unicode.GetString(recBuffer, 0, dataSize);
-                Debug.Log("Player " + connectionId + " has conected and send ");
+                ConnectionHandle(0);
+                Debug.Log("Player " + connectionId + " has conected");
                 break;
 
             case NetworkEventType.DataEvent:
@@ -70,10 +73,38 @@ public class Server : MonoBehaviour
 
             case NetworkEventType.DisconnectEvent:
                 string disconnectEventMsg = Encoding.Unicode.GetString(recBuffer, 0, dataSize);
+                DisconnectionHandle();
                 Debug.Log("Player " + connectionId + " has disconnected and send ");
                 break;
-            case NetworkEventType.BroadcastEvent:
-                break;
+            /*case NetworkEventType.BroadcastEvent:
+                break;*/
         }
+    }
+
+    public void ConnectionHandle(int connectionRequestPort)
+    {
+        if (isPlaying == false)
+        {
+            //Deveria perguntar se quer jogar, mas por hora vou iniciar o jogo direto***
+            //Trocar a cena, começar as transacoes de jogos, alterar o estado para jogando;
+
+            //Client.instance.SendConnectionRequest(connectionRequestPort);
+            Debug.Log("vamos jogar");
+            isPlaying = true; //lembrar de trocar quando acabar o jogo
+        }
+        else
+        {
+            Debug.Log("nao vamos jogar");
+        }
+    }
+
+    public void DisconnectionHandle()
+    {
+        isPlaying = false;
+    }
+
+    public void RegisterNewNode(int nodePort)
+    {
+        KnowNodes.Add(nodePort);
     }
 }

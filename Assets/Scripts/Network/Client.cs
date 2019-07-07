@@ -7,14 +7,15 @@ using UnityEngine.UI;
 
 public class Client : MonoBehaviour
 {
-    //public static Client instance = null;
+    public static Client instance = null;
 
     public Text ClientDebugText;
 
-    private const int MAX_CONNECTION = 2;
+    //Need to find a way to define that gaming connection is diferent from blockchain connection
+    private const int MAX_CONNECTION = 125; // As bitcoin, by default we can receice 125 connections by peer.
 
     public int portToConnect;
-    private int myPort;
+    private int myServerPort;
 
     private int hostId;
     private int connectionID;
@@ -28,12 +29,12 @@ public class Client : MonoBehaviour
 
     private void Start()
     {
-        /*if (instance == null)
+        if (instance == null)
             instance = this;
         else if (instance != null)
-            Destroy(gameObject);*/
+            Destroy(gameObject);
 
-        //myPort = Server.instance.port;
+        myServerPort = Server.instance.serverPort;
 
         NetworkTransport.Init();
         ConnectionConfig cc = new ConnectionConfig();
@@ -44,8 +45,6 @@ public class Client : MonoBehaviour
         HostTopology topo = new HostTopology(cc, MAX_CONNECTION);
 
         hostId = NetworkTransport.AddHost(topo, 0);
-
-        connectionID = NetworkTransport.Connect(hostId, "127.0.0.1", portToConnect, 0, out error);//improve this method to send info to every node in network
     }
 
     private void Update()
@@ -58,7 +57,7 @@ public class Client : MonoBehaviour
         int dataSize;
         byte error;
 
-        sendMessageToServer("Sending message from node at port " + Server.hostingPort + "||" + " to node at port" + portToConnect);
+        //sendMessageToServer("Sending message from node at port " + myHostPort + "||" + " to node at port" + portToConnect);
 
         NetworkEventType recData = NetworkTransport.Receive(out recHostId, out connectionId, out channelId, recBuffer, bufferSize, out dataSize, out error);
 
@@ -70,6 +69,17 @@ public class Client : MonoBehaviour
                 OnDataEvent();
                 break;
         }
+    }
+
+    public void SendConnectionRequest(int portToConnect)
+    {
+        string infoToSend = @"{port:" + myServerPort + "}";
+
+        byte[] buffer = Encoding.Unicode.GetBytes(JsonUtility.ToJson(infoToSend));//Envia a porta dessa instancia na solicitacao de conexao, para que o no solicitado responda.
+
+       // NetworkTransport.Send(hostId, connectionID, unreliableChannel, buffer, infoToSend.Length * sizeof(char), out error);//Here could be a json to be easier
+
+        connectionID = NetworkTransport.Connect(hostId, "127.0.0.1", portToConnect, 0, out error);//improve this method to send info to every node in network
     }
 
     private void OnDataEvent()

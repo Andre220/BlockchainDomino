@@ -14,11 +14,15 @@ namespace Assets.Scripts.Services
         public static GameAdm instance = null;
         public List<GameObject> DontDestroyGameObjects;
 
-        public Text NameInput;
-        public Text PortInput;
+        public InputField NameInput;
+        public InputField PortInput;
+
+        public string PlayerName;
 
         void Start()
         {
+            PlayerName = NameInput.text;
+
             if (instance == null)
                 instance = this;
             else if (instance != null)
@@ -34,13 +38,12 @@ namespace Assets.Scripts.Services
 
         public void Login()//pass port and name to client and server scripts, them change to next scene
         {
-            //Server.instance.port = int.Parse(PortInput.text); //Server - port that i use to listen
+            Server.instance.serverPort = int.Parse(PortInput.text); //Server - port that i use to listen
             //Client.instance.port = int.Parse(PortInput.text); //Client - port that i want to send something, so dont define it now
-
-            SceneManager.LoadScene(name, LoadSceneMode.Single);
+            SceneManager.LoadScene("LobbyScene", LoadSceneMode.Single);
         }
 
-        public void ChangeScene(string name)
+        public void ConnectToPlayer(int playerPort)
         {
             
         }
