@@ -17,6 +17,7 @@ public class Block : MonoBehaviour
     public IList<Transaction> Transactions { get; set; }
     public int nonce { get; set; } = 0;
 
+    //Deprecated, the block will hold a list of transactions, not a primitive data
     public Block(DateTime timeStamp, string previousHash, string data)
     {
         Index = 0;

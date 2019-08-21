@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIForm : MonoBehaviour
+public class BlockchainForm : MonoBehaviour
 {
     #region TransacionCreation
     public InputField Sender;

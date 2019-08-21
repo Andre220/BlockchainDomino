@@ -6,14 +6,14 @@ using UnityEngine;
 public class Blockchain : MonoBehaviour
 {
     public int Difficcult { get; set; } = 2;
-    public int Reward { get; set; } = 1;
+    public int Reward { get; set; } = 1; //Reward to the miner who manage to mine the block
 
     public IList<Transaction> TransactionPool = new List<Transaction>();
     public IList<Block> Chain { get; set; }
     public Blockchain()
     {
         InitializeChain();
-        //Descobrir se a máquina possui uma cópia da corrente, se sim, consumi-la, senão, criar
+        //Find ou if the machine have a copy of blockchain. If yes, catch it, else create one 
         AddGenesisBlock();
     }
 
@@ -30,7 +30,6 @@ public class Blockchain : MonoBehaviour
         var endTimeCreate = DateTime.Now;
 
         Debug.Log($"Duracao = {endTimeCreate - startTimeCreate}");
-
 
         //Reset transactionPool
         TransactionPool = new List<Transaction>();
