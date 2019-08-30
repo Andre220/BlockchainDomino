@@ -13,12 +13,6 @@ namespace Assets.Scripts.Services
     {
         public static GameAdm instance = null;
 
-        public enum GameState
-        {
-            WaitingForOponent,
-            AskedToPlay,
-            Playing,
-        }
 
         [HideInInspector]
         public GameObject Node;//Hold the gameobject that network scripts (server and client) will be add.
@@ -67,8 +61,9 @@ namespace Assets.Scripts.Services
 
         public void CreateServer()
         {
-            Node.AddComponent<Server>().ListeningPort = int.Parse(ServerFormPortInput.text);
-            Node.AddComponent<Client>().clientPort = int.Parse(ServerFormPortInput.text);
+            /*Node.AddComponent<Server>().ListeningPort = int.Parse(ServerFormPortInput.text);
+            Node.AddComponent<Client>().clientPort = int.Parse(ServerFormPortInput.text);*/
+            Node.AddComponent<NetworkPeer>().ListeningPort = int.Parse(ServerFormPortInput.text);
             ServerForm.SetActive(false);
             ClientForm.SetActive(true);
         }
@@ -103,7 +98,7 @@ namespace Assets.Scripts.Services
 
         public void CreateConnection()
         {
-            Client.instance.CreateConnection(int.Parse(ClientFormPortInput.text));
+            //NetworkPeer.instance.LocalHostConnect(int.Parse(ClientFormPortInput.text));
         }
 
         public void ChangeScene(int index)

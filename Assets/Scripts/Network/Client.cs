@@ -1,39 +1,44 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class Client : MonoBehaviour
+public class Client : MonoBehaviour, INetworkClient
 {
-    public static Client instance = null;
+    //public static Client instance = null;
 
-    private const int MAX_CONNECTION = 15;
+    public const int MAX_CONNECTION = 2;
 
-    public int clientPort;
-
-    //public int portToConnect;
-    //private int clientPort;
-
-    private int hostId;
-    private List<int> connectionsID; //Hold the ID of each connection that this client have.
+    public int hostId;
+    private List<int> connectionsID = new List<int>(); //Hold the ID of each connection that this client have.
+    private List<ConnectionInfoLocalHost> localHostConnectedNodes = new List<ConnectionInfoLocalHost>(); //Hold the info of each connection
 
     private int reliableChannel;
     private int unreliableChannel;
 
     private byte error;
 
-    public string message;
-
     private void Start()
     {
-        if (instance == null)
-            instance = this;
-        else if (instance != null)
-            Destroy(gameObject);
+        ConfigureNetworkInit();
+    }
 
-        //myPort = Server.instance.port;
+    void Update()
+    {
+        ConnectionInfoLocalHost connectionInfo = new ConnectionInfoLocalHost
+        {
+            ConnectionID = 0,
+            LocalhostPort = 0,
+            NickName = "pipi"
+        };
 
+        SendMessageToLocalhostNode(new NetworkMessageBase(NetworkMessageType.ConnectionInfo, connectionInfo), 1);
+    }
+
+    void ConfigureNetworkInit()
+    {
         NetworkTransport.Init();
         ConnectionConfig cc = new ConnectionConfig();
 
@@ -43,46 +48,83 @@ public class Client : MonoBehaviour
         HostTopology topo = new HostTopology(cc, MAX_CONNECTION);
 
         hostId = NetworkTransport.AddHost(topo, 0);
-
-        //connectionsID.Add(NetworkTransport.Connect(hostId, "127.0.0.1", portToConnect, 0, out error));//improve this method to send info to every node in network
     }
 
-    private void Update()
+    #region Connect and Disconnect
+
+    public void ConnectToLocalhostNode(int port)
     {
-        int recHostId;
-        int connectionId;
-        int channelId;
-        byte[] recBuffer = new byte[1024];
-        int bufferSize = 1024;
-        int dataSize;
-        byte error;
+        int connectionID = NetworkTransport.Connect(hostId, "127.0.0.1", port, 0, out error);
 
+        connectionsID.Add(connectionID);
 
-        //sendMessageToServer("Sending message from node at port " + myPort + " to node at port " + portToConnect);
-        //sendMessageToServer("Sending message from node at port " + "||" + " to node at port " + portToConnect);
-        //sendMessageToServer("Sending message from node at port " + SendingPort + " to node at port" + "||");
-
-        /*NetworkEventType recData = NetworkTransport.Receive(out recHostId, out connectionId, out channelId, recBuffer, bufferSize, out dataSize, out error);
-
-        switch (recData)
+        localHostConnectedNodes.Add(new ConnectionInfoLocalHost
         {
-            case NetworkEventType.DataEvent:
-                string msg = Encoding.Unicode.GetString(recBuffer, 0, dataSize);
-                message = msg;
-                OnDataEvent();
-                break;
-        }*/
+            ConnectionID = connectionID,
+            LocalhostPort = port,
+            NickName = "Guest " + DateTime.Now
+        });
     }
 
-    private void OnDataEvent()
+    public void ConnectToLocalhostNode(int port, string nickname)
     {
-        Debug.Log("We got a message " + message);
+        int connectionID = NetworkTransport.Connect(hostId, "127.0.0.1", port, 0, out error);
+
+        connectionsID.Add(connectionID);
+
+        ConnectionInfoLocalHost connectionInfo = new ConnectionInfoLocalHost
+        {
+            ConnectionID = connectionID,
+            LocalhostPort = port,
+            NickName = nickname
+        };
+
+        NetworkMessageBase message = new NetworkMessageBase(NetworkMessageType.ConnectionInfo, connectionInfo);
+
+        //localHostConnectedNodes.Add(connectionInfo);
+
+        SendMessageToLocalhostNode(message, connectionID);
     }
 
-    public void CreateConnection(int port)
+    public void DebugConnectedNodes(List<ConnectionInfoLocalHost> connectionInfoLocalHost)
     {
-        connectionsID.Add(NetworkTransport.Connect(hostId, "127.0.0.1", port, 0, out error));//improve this method to send info to every node in network
-        sendMessageToNode(clientPort.ToString(), connectionsID[connectionsID.Count -1]);//Passing my port to server
+        foreach (ConnectionInfoLocalHost CILH in connectionInfoLocalHost)
+        {
+            print
+            (
+                "Connection info ID " + CILH.ConnectionID + "| \n" +
+                "localhost port " + CILH.LocalhostPort + " | \n" +
+                "Player Nickname " + CILH.NickName + "| \n"
+            );
+        }
+    }
+
+    public void DisconnectFromLocalhostNode(int connectionID)
+    {
+        bool success = NetworkTransport.Disconnect(hostId, connectionID, out error);
+
+        if (success)
+        {
+            connectionsID.Remove(connectionID);
+
+            localHostConnectedNodes.Remove(localHostConnectedNodes.Find(x => x.ConnectionID == connectionID));
+        }
+        else
+        {
+            Debug.LogError("Couldn`t disconnect user with connection ID " + connectionID + ". You should look better for what happened.");
+        }
+    }
+
+    #endregion
+
+    #region Send and Broadcast Messages
+
+    public void BroadcastMessageToLocalHostNodes(NetworkMessageBase messageBaseObject, List<int> ConnectionIDList)
+    {
+        foreach (int ConnectionID in ConnectionIDList)
+        {
+            SendMessageToLocalhostNode(messageBaseObject, ConnectionID);
+        }
     }
 
     public void sendMessageToConnectedNodes(string MessageToStream)
@@ -92,18 +134,14 @@ public class Client : MonoBehaviour
         {
             NetworkTransport.Send(hostId, connectionsID[i], unreliableChannel, buffer, MessageToStream.Length * sizeof(char), out error);
         }
-
     }
 
-    public void sendMessageToNode(string MessageToStream, int connectionID)
+    public void SendMessageToLocalhostNode(NetworkMessageBase messageBaseObject, int ConnectionID)
     {
-        byte[] buffer = Encoding.Unicode.GetBytes(MessageToStream);
-        NetworkTransport.Send(hostId, connectionID, unreliableChannel, buffer, MessageToStream.Length * sizeof(char), out error);
+        string messageBaseObjectJson = JsonUtility.ToJson(messageBaseObject);
+        byte[] buffer = Encoding.Unicode.GetBytes(messageBaseObjectJson);
+        NetworkTransport.Send(hostId, ConnectionID, unreliableChannel, buffer, messageBaseObjectJson.Length * sizeof(char), out error);
     }
 
-    /*public void sendMessageToServer(string infotToSend)
-    {
-        byte[] buffer = Encoding.Unicode.GetBytes(infotToSend);
-        NetworkTransport.Send(hostId, connectionID, unreliableChannel, buffer, infotToSend.Length * sizeof(char), out error);//Here could be a json to be easier
-    }*/
+    #endregion
 }

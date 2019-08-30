@@ -233,7 +233,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12fd41398e4f54742b453ac884346c8e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  port: 23500
+  ListeningPort: 25000
 --- !u!114 &851186490
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -241,12 +241,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 851186488}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 78e8659f5cff1794aaabc9e418c0e689, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  portToConnect: 23500
+  clientPort: 25001
   message: Bababea
 --- !u!4 &851186491
 Transform:

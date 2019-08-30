@@ -1,36 +1,45 @@
 ﻿using Assets.Scripts.Services;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class Server : MonoBehaviour
+public class Server : MonoBehaviour, INetworkServer
 {
-    //public IList<int> KnowNodes; //Here i storage the nodes (the port value) of any node that already connect to me;
+    public List<ConnectionInfoLocalHost> localHostKnowNodes = new List<ConnectionInfoLocalHost>(); //Here i storage the nodes that already connect to me;
 
-    public static Server instance = null;
+    //public static Server instance = null;
 
-    private const int MAX_CONNECTION = 15;
+    public event Action ConnectEvent;
+    public event Action DataReceiveEvent;
+    public event Action DisconnectEvent;
 
-    public int ListeningPort;//Default port is 23500
+    private const int MAX_CONNECTION = 2;
 
-    private int hostId;
+    public int hostId;
 
     private int reliableChannel;
     private int unreliableChannel;
 
     private byte error;
 
-    private void Start()
+    public int serverPort; // Port that is open and listening for messages.
+
+    void Start()
     {
-        if (instance == null)
+        /*if (instance == null)
             instance = this;
         else if (instance != null)
-            Destroy(gameObject);
+            Destroy(gameObject);*/
 
         // KnowNodes = new List<int>();
+        ConfigureNetworkInit();
+    }
 
+    void ConfigureNetworkInit()
+    {
         NetworkTransport.Init();
         ConnectionConfig cc = new ConnectionConfig();
 
@@ -39,10 +48,15 @@ public class Server : MonoBehaviour
 
         HostTopology topo = new HostTopology(cc, MAX_CONNECTION);
 
-        hostId = NetworkTransport.AddHost(topo, ListeningPort, null);// the ip is null because we are at localhost - i should test it with 127.0.0.1 to see how it behave
+        hostId = NetworkTransport.AddHost(topo, serverPort, null);// the ip is null because we are at localhost - i should test it with 127.0.0.1 to see how it behave
     }
 
-    private void Update()
+    void Update()
+    {
+        LocalHostServer();
+    }
+
+    void LocalHostServer()
     {
         int recHostId;
         int connectionId;
@@ -60,24 +74,59 @@ public class Server : MonoBehaviour
                 break;
 
             case NetworkEventType.ConnectEvent:
-                string connectEventMsg = Encoding.Unicode.GetString(recBuffer, 0, dataSize);
-                Debug.Log("Player " + connectionId + " has conected and send " + connectEventMsg);
-                GameAdm.instance.PlayRequest();
+                OnConnectEvent(recHostId, connectionId, (NetworkError)error);
                 break;
 
             case NetworkEventType.DataEvent:
-                string dataEventMsg = Encoding.Unicode.GetString(recBuffer, 0, dataSize);
-                Debug.Log("Player " + connectionId + " has sended " + dataEventMsg);
+                OnDataReceiveEvent(recHostId, connectionId, recBuffer, (NetworkError)error);
                 break;
 
             case NetworkEventType.DisconnectEvent:
-                string disconnectEventMsg = Encoding.Unicode.GetString(recBuffer, 0, dataSize);
-                Debug.Log("Player " + connectionId + " has disconnected and send ");
+                OnDisconnectEvent(recHostId, connectionId, (NetworkError)error);
                 break;
             case NetworkEventType.BroadcastEvent:
                 break;
         }
     }
+
+    #region network Events Handlers
+
+    public void OnConnectEvent(int hostId, int connectionId, NetworkError error)
+    {
+        ConnectEvent?.Invoke();
+
+        print("Connection event = |hostId: " + hostId + " | connectionId : "
+           + connectionId + " | error: " + error.ToString() + "|");
+    }
+
+    public void OnDataReceiveEvent(int hostId, int connectionId, byte[] buffer, NetworkError error)
+    {
+        DataReceiveEvent?.Invoke();
+
+        NetworkMessageBase message = JsonUtility.FromJson<NetworkMessageBase>( Encoding.Unicode.GetString(buffer));
+
+        switch (message.messageType)
+        {
+            case NetworkMessageType.ConnectionInfo: // Get connection info and save in connections pool
+                //localHostKnowNodes.Add((ConnectionInfoLocalHost)message.MessageInfo);
+                break;
+            case NetworkMessageType.ConnectionResponse: // if connection response is ok, continue. Else, disconnect from node.
+                break;
+            case NetworkMessageType.GameplayInfo: // call event to deal with this event and every gameplay script who sould know about network info should do your action
+                break;
+        }
+
+        print("Disconnection event = |hostId: " + hostId + " | connectionId : "
+           + connectionId + " | error: " + error.ToString() + "|");
+    }
+
+    public void OnDisconnectEvent(int hostId, int connectionId, NetworkError error)
+    {
+        DisconnectEvent?.Invoke();
+
+        print("Disconnection event = |hostId: " + hostId + " | connectionId : "
+           + connectionId + " | error: " + error.ToString() + "|");
+    }
+
+    #endregion
 }
-/*
-*/
