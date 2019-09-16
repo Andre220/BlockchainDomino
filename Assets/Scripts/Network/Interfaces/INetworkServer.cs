@@ -9,6 +9,9 @@ public interface INetworkServer
     event Action ConnectEvent;
     event Action DataReceiveEvent;
     event Action DisconnectEvent;
+    event Action ConnectionInfoEvent;
+
+    List<ConnectionInfoLocalHost> LocalHostKnowNodes { get; set; }
 
     void OnConnectEvent(int hostId, int connectionId, NetworkError error);
 

@@ -13,10 +13,12 @@ public class UIManager : MonoBehaviour
     INetworkServer _networkServerService;
 
     public Transform OnlineNodesFather;
-    public GameObject SocialPeerPrefab;
+    public GameObject PeerInfoPrefab;
 
     public GameObject ConnectionUI;
-    public GameObject UI_LocalHostPlayerConnectionRequest;
+    public GameObject LocalHostPlayerConnectionRequest;
+
+    public GameObject GameUI;
 
     void Start()
     {
@@ -32,6 +34,7 @@ public class UIManager : MonoBehaviour
                 Node = GameObject.Find("Node");
             }
         }
+        _networkServerService.ConnectEvent += StartGame;
     }
 
     #region basic UI Function to enable and disable UI Objects
@@ -47,6 +50,11 @@ public class UIManager : MonoBehaviour
     }
 
     #endregion
+
+    public void ShowConnectedPeerInfo()
+    {
+
+    }
 
     public void SetupPeerServerAndClient(Text myListeningPort)
     {
@@ -88,9 +96,32 @@ public class UIManager : MonoBehaviour
         //_networkService.SendMessageToLocalhostNode("test", 1);
     }
 
+    public void SendDebugMessage(Text message)
+    {
+        NetworkMessageBase networkMessage = new NetworkMessageBase(
+            NetworkMessageType.ConnectionInfo, new ConnectionInfoLocalHost
+            {
+                ConnectionID = 1,
+                LocalhostPort = 123,
+                NickName = "Tester"
+            }
+        );
+
+        _networkClientService.SendMessageToLocalhostNode(networkMessage, 1);
+    }
 
     public void DeclineConnectionRequest(int connectionID)
     {
         //_networkService.LocalHostDisconnect(connectionID);
+    }
+
+    public void EnableGameUI()
+    {
+        GameUI.SetActive(true);
+    }
+
+    public void StartGame()
+    {
+
     }
 }

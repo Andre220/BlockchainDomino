@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,14 +10,15 @@ public enum NetworkMessageType
     GameplayInfo = 2
 }
 
+[Serializable]
 public class NetworkMessageBase
 {
-    public NetworkMessageType messageType { get; set; }
-    public dynamic MessageInfo { get; set; }
+    public NetworkMessageType messageType;
+    public object MessageObj;
 
-    public NetworkMessageBase(NetworkMessageType type, dynamic messageInfo)
+    public NetworkMessageBase(NetworkMessageType type, object messageObj)
     {
         messageType = type;
-        MessageInfo = messageInfo;
+        MessageObj = messageObj;
     }
 }

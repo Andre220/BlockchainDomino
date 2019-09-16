@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Security.Cryptography;
@@ -40,7 +41,7 @@ public class Block : MonoBehaviour
     {
         SHA256 sha256 = SHA256.Create();
 
-        byte[] inputBytes = Encoding.ASCII.GetBytes($"{TimeStamp}-{PreviousBlockHash ?? ""}-{JsonUtility.ToJson(Transactions)}-{nonce}");
+        byte[] inputBytes = Encoding.ASCII.GetBytes($"{TimeStamp}-{PreviousBlockHash ?? ""}-{JsonConvert.SerializeObject(Transactions)}-{nonce}");
         byte[] outputBytes = sha256.ComputeHash(inputBytes);
 
         return Convert.ToBase64String(outputBytes);

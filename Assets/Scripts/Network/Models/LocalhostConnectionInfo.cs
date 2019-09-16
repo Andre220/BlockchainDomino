@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,9 +7,11 @@ using UnityEngine;
 /// hold info of people connect to you server.
 /// Remember that this info is about the OTHER PLAYER CONNECTED TO YOU SERVER.
 /// </summary>
-public class ConnectionInfoLocalHost : MonoBehaviour
+
+[Serializable]
+public class ConnectionInfoLocalHost
 {
-    public int ConnectionID { get; set; }
-    public int LocalhostPort { get; set; }
-    public string NickName { get; set; }
+    public int ConnectionID;
+    public int LocalhostPort;
+    public string NickName;
 }

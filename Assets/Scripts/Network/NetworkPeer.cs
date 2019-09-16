@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.Services;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -88,7 +89,7 @@ public class NetworkPeer : MonoBehaviour
 
                 string dataEventMsg = Encoding.Unicode.GetString(recBuffer, 0, dataSize);
 
-                var json = JsonUtility.FromJson<object>(dataEventMsg);
+                var json = JsonConvert.DeserializeObject<object>(dataEventMsg);
 
                 print(json.ToString());
 

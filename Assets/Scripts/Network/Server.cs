@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.Services;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,13 +9,15 @@ using UnityEngine.Networking;
 
 public class Server : MonoBehaviour, INetworkServer
 {
-    public List<ConnectionInfoLocalHost> localHostKnowNodes = new List<ConnectionInfoLocalHost>(); //Here i storage the nodes that already connect to me;
+    public List<ConnectionInfoLocalHost> LocalHostKnowNodes { get; set; } //Here i storage the nodes that already connect to me;
 
     //public static Server instance = null;
 
     public event Action ConnectEvent;
     public event Action DataReceiveEvent;
     public event Action DisconnectEvent;
+    public event Action ConnectionInfoEvent;
+
 
     private const int MAX_CONNECTION = 2;
 
@@ -35,6 +38,7 @@ public class Server : MonoBehaviour, INetworkServer
             Destroy(gameObject);*/
 
         // KnowNodes = new List<int>();
+
         ConfigureNetworkInit();
     }
 
@@ -49,6 +53,9 @@ public class Server : MonoBehaviour, INetworkServer
         HostTopology topo = new HostTopology(cc, MAX_CONNECTION);
 
         hostId = NetworkTransport.AddHost(topo, serverPort, null);// the ip is null because we are at localhost - i should test it with 127.0.0.1 to see how it behave
+
+        LocalHostKnowNodes = new List<ConnectionInfoLocalHost>();
+
     }
 
     void Update()
@@ -61,8 +68,8 @@ public class Server : MonoBehaviour, INetworkServer
         int recHostId;
         int connectionId;
         int channelId;
-        byte[] recBuffer = new byte[1024];
-        int bufferSize = 1024;
+        byte[] recBuffer = new byte[178];
+        int bufferSize = 178;
         int dataSize;
         byte error;
 
@@ -103,12 +110,14 @@ public class Server : MonoBehaviour, INetworkServer
     {
         DataReceiveEvent?.Invoke();
 
-        NetworkMessageBase message = JsonUtility.FromJson<NetworkMessageBase>( Encoding.Unicode.GetString(buffer));
+        var JsonText = Encoding.Unicode.GetString(buffer);
+
+        NetworkMessageBase message = JsonConvert.DeserializeObject<NetworkMessageBase>(JsonText);
 
         switch (message.messageType)
         {
             case NetworkMessageType.ConnectionInfo: // Get connection info and save in connections pool
-                //localHostKnowNodes.Add((ConnectionInfoLocalHost)message.MessageInfo);
+                OnConnectionInfoEvent(hostId, connectionId, message, buffer, error);
                 break;
             case NetworkMessageType.ConnectionResponse: // if connection response is ok, continue. Else, disconnect from node.
                 break;
@@ -116,7 +125,7 @@ public class Server : MonoBehaviour, INetworkServer
                 break;
         }
 
-        print("Disconnection event = |hostId: " + hostId + " | connectionId : "
+        print("Data event = |hostId: " + hostId + " | connectionId : "
            + connectionId + " | error: " + error.ToString() + "|");
     }
 
@@ -126,6 +135,15 @@ public class Server : MonoBehaviour, INetworkServer
 
         print("Disconnection event = |hostId: " + hostId + " | connectionId : "
            + connectionId + " | error: " + error.ToString() + "|");
+    }
+
+    public void OnConnectionInfoEvent(int hostId, int connectionId, NetworkMessageBase networkMessageBase, byte[] buffer, NetworkError error)
+    {
+        ConnectionInfoLocalHost infoFromConnectedPeer = JsonConvert.DeserializeObject<ConnectionInfoLocalHost>(networkMessageBase.MessageObj.ToString());
+
+        ConnectionInfoEvent?.Invoke();
+
+        LocalHostKnowNodes.Add(infoFromConnectedPeer);
     }
 
     #endregion

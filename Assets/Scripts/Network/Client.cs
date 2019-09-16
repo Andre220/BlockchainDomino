@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -12,8 +13,8 @@ public class Client : MonoBehaviour, INetworkClient
     public const int MAX_CONNECTION = 2;
 
     public int hostId;
-    private List<int> connectionsID = new List<int>(); //Hold the ID of each connection that this client have.
-    private List<ConnectionInfoLocalHost> localHostConnectedNodes = new List<ConnectionInfoLocalHost>(); //Hold the info of each connection
+    public List<int> connectionsID = new List<int>(); //Hold the ID of each connection that this client have.
+    public List<ConnectionInfoLocalHost> localHostConnectedNodes = new List<ConnectionInfoLocalHost>(); //Hold the info of each connection
 
     private int reliableChannel;
     private int unreliableChannel;
@@ -23,18 +24,6 @@ public class Client : MonoBehaviour, INetworkClient
     private void Start()
     {
         ConfigureNetworkInit();
-    }
-
-    void Update()
-    {
-        ConnectionInfoLocalHost connectionInfo = new ConnectionInfoLocalHost
-        {
-            ConnectionID = 0,
-            LocalhostPort = 0,
-            NickName = "pipi"
-        };
-
-        SendMessageToLocalhostNode(new NetworkMessageBase(NetworkMessageType.ConnectionInfo, connectionInfo), 1);
     }
 
     void ConfigureNetworkInit()
@@ -138,7 +127,7 @@ public class Client : MonoBehaviour, INetworkClient
 
     public void SendMessageToLocalhostNode(NetworkMessageBase messageBaseObject, int ConnectionID)
     {
-        string messageBaseObjectJson = JsonUtility.ToJson(messageBaseObject);
+        string messageBaseObjectJson = JsonConvert.SerializeObject(messageBaseObject);
         byte[] buffer = Encoding.Unicode.GetBytes(messageBaseObjectJson);
         NetworkTransport.Send(hostId, ConnectionID, unreliableChannel, buffer, messageBaseObjectJson.Length * sizeof(char), out error);
     }
