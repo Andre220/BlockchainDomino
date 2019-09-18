@@ -9,17 +9,24 @@ using UnityEngine.Networking;
 
 public class Server : MonoBehaviour, INetworkServer
 {
-    public List<ConnectionInfoLocalHost> LocalHostKnowNodes { get; set; } //Here i storage the nodes that already connect to me;
+
+    public List<int> connectionsID = new List<int>(); //Hold the ID of each connection that this server received
+    public List<LocalHostConnectionInfo> LocalHostKnowNodes { get; set; } //Here i storage the nodes that already connect to me;
 
     //public static Server instance = null;
 
+    //Unity LLAPI basic network message typs
     public event Action ConnectEvent;
     public event Action DataReceiveEvent;
-    public event Action DisconnectEvent;
-    public event Action ConnectionInfoEvent;
+    public event Action<int> DisconnectEvent;
+    public event Action BroadcastEvent;
 
+    // public event Action ConnectionInfoEvent;
 
-    private const int MAX_CONNECTION = 2;
+    public event Action PlayRequestEvent;
+    public event Action PlayRequestResponseAcceptEvent;
+
+    private const int MAX_CONNECTION = 20;
 
     public int hostId;
 
@@ -32,14 +39,12 @@ public class Server : MonoBehaviour, INetworkServer
 
     void Start()
     {
-        /*if (instance == null)
-            instance = this;
-        else if (instance != null)
-            Destroy(gameObject);*/
-
-        // KnowNodes = new List<int>();
-
         ConfigureNetworkInit();
+    }
+
+    void Update()
+    {
+        LocalHostServer(); //Listening 
     }
 
     void ConfigureNetworkInit()
@@ -54,13 +59,8 @@ public class Server : MonoBehaviour, INetworkServer
 
         hostId = NetworkTransport.AddHost(topo, serverPort, null);// the ip is null because we are at localhost - i should test it with 127.0.0.1 to see how it behave
 
-        LocalHostKnowNodes = new List<ConnectionInfoLocalHost>();
+        LocalHostKnowNodes = new List<LocalHostConnectionInfo>();
 
-    }
-
-    void Update()
-    {
-        LocalHostServer();
     }
 
     void LocalHostServer()
@@ -96,14 +96,25 @@ public class Server : MonoBehaviour, INetworkServer
         }
     }
 
-    #region network Events Handlers
+    #region DEFAULT Connection Events Handlers
 
     public void OnConnectEvent(int hostId, int connectionId, NetworkError error)
     {
         ConnectEvent?.Invoke();
 
-        print("Connection event = |hostId: " + hostId + " | connectionId : "
-           + connectionId + " | error: " + error.ToString() + "|");
+        connectionsID.Add(connectionId);
+
+        LocalHostKnowNodes.Add(new LocalHostConnectionInfo
+        {
+            ConnectionID = connectionId,
+            LocalhostPort = hostId,
+            NickName = "Guest" + DateTime.Now
+        });
+
+        print("|Connection event: " +
+            " |HostId: " + hostId + 
+            " |ConnectionId : " + connectionId + 
+            " |Error: " + error.ToString());
     }
 
     public void OnDataReceiveEvent(int hostId, int connectionId, byte[] buffer, NetworkError error)
@@ -112,39 +123,77 @@ public class Server : MonoBehaviour, INetworkServer
 
         var JsonText = Encoding.Unicode.GetString(buffer);
 
-        NetworkMessageBase message = JsonConvert.DeserializeObject<NetworkMessageBase>(JsonText);
+        CustomNetworkMessageBase message = JsonConvert.DeserializeObject<CustomNetworkMessageBase>(JsonText);
 
         switch (message.messageType)
         {
-            case NetworkMessageType.ConnectionInfo: // Get connection info and save in connections pool
-                OnConnectionInfoEvent(hostId, connectionId, message, buffer, error);
+            case CustomDataEventsEnum.ConnectionInfoRequest: // Get connection info and save in connections pool
+                //OnConnectionInfoEvent(hostId, connectionId, message, buffer, error);
                 break;
-            case NetworkMessageType.ConnectionResponse: // if connection response is ok, continue. Else, disconnect from node.
+            case CustomDataEventsEnum.PlayRequest: // if connection response is ok, continue. Else, disconnect from node.
+                PlayRequestEvent?.Invoke();
                 break;
-            case NetworkMessageType.GameplayInfo: // call event to deal with this event and every gameplay script who sould know about network info should do your action
+            case CustomDataEventsEnum.PlayRequestAccept:
+                PlayRequestResponseAcceptEvent?.Invoke();
+                break;
+            case CustomDataEventsEnum.PlayRequestDecline:
+                //OnPlayRequestResponseEvent();
+                break;
+            case CustomDataEventsEnum.PlayerMove: // call event to deal with this event and every gameplay script who sould know about network info should do your action
+
                 break;
         }
 
-        print("Data event = |hostId: " + hostId + " | connectionId : "
-           + connectionId + " | error: " + error.ToString() + "|");
+        print("|Data event: " +
+            "/n|HostId: " + hostId + 
+            "/n|ConnectionId : " + connectionId + 
+            "/n|Error: " + error.ToString());
     }
 
     public void OnDisconnectEvent(int hostId, int connectionId, NetworkError error)
     {
-        DisconnectEvent?.Invoke();
+        DisconnectEvent?.Invoke(connectionId);
 
-        print("Disconnection event = |hostId: " + hostId + " | connectionId : "
-           + connectionId + " | error: " + error.ToString() + "|");
+
+        print("|Disconnect event: " +
+            "/n|HostId: " + hostId +
+            "/n|ConnectionId : " + connectionId +
+            "/n|Error: " + error.ToString());
     }
 
-    public void OnConnectionInfoEvent(int hostId, int connectionId, NetworkMessageBase networkMessageBase, byte[] buffer, NetworkError error)
+    public void OnBroadcastEvent(int hostId, int connectionId, NetworkError error)
     {
-        ConnectionInfoLocalHost infoFromConnectedPeer = JsonConvert.DeserializeObject<ConnectionInfoLocalHost>(networkMessageBase.MessageObj.ToString());
+        BroadcastEvent?.Invoke();
+
+        print("|Boradcast event: " +
+            "/n|HostId: " + hostId +
+            "/n|ConnectionId : " + connectionId +
+            "/n|Error: " + error.ToString());
+    }
+
+    #endregion
+
+    #region CUSTOM Connection Events Handlers
+
+    /*public void OnConnectionInfoEvent(int hostId, int connectionId, NetworkCustomMessageBase networkMessageBase, byte[] buffer, NetworkError error)
+    {
+        LocalHostConnectionInfo infoFromConnectedPeer = JsonConvert.DeserializeObject<LocalHostConnectionInfo>(networkMessageBase.MessageObj.ToString());
 
         ConnectionInfoEvent?.Invoke();
 
         LocalHostKnowNodes.Add(infoFromConnectedPeer);
     }
+
+    public void OnPlayRequestEvent()
+    {
+        PlayRequestEvent?.Invoke();
+    }
+
+    public void OnPlayRequestResponseEvent()
+    {
+        PlayRequestResponseEvent?.Invoke();
+    }*/
+
 
     #endregion
 }

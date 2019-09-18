@@ -6,12 +6,17 @@ using UnityEngine.Networking;
 
 public interface INetworkServer
 {
+    //Unity LLAPI network events 
     event Action ConnectEvent;
     event Action DataReceiveEvent;
-    event Action DisconnectEvent;
-    event Action ConnectionInfoEvent;
+    event Action<int> DisconnectEvent;
+    event Action BroadcastEvent;
 
-    List<ConnectionInfoLocalHost> LocalHostKnowNodes { get; set; }
+    //Domino Custom events
+    event Action PlayRequestEvent;
+
+
+    List<LocalHostConnectionInfo> LocalHostKnowNodes { get; set; }
 
     void OnConnectEvent(int hostId, int connectionId, NetworkError error);
 

@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/OneSceneGame.unity
-    guid: 4fb1ea725caa99145a4f28d989679023
+    path: Assets/Scenes/Producao/LocalHost/(LocalHost)MainScene.unity
+    guid: b554af18450c60d4f8c37e3248b02363
+  - enabled: 1
+    path: Assets/Scenes/Tests/DominoTests.unity
+    guid: 00a39367c54fd7f4f9502c9764e13dd6
   m_configObjects: {}

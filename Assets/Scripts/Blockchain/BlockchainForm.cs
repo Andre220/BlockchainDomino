@@ -40,7 +40,7 @@ public class BlockchainForm : MonoBehaviour
 
         foreach (Transaction t in transactions)
         {
-            BlockInfo.text += "| from " + t.FromAddress + " to " + t.ToAddress + " the amount of " + t.AmountAddress + " | \n";
+            BlockInfo.text += "| from " + t.FromAddress + " to " + t.ToAddress + " the amount of " + t.AmountAddress + " |  ";
         }
     }
 }

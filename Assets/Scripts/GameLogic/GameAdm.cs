@@ -7,6 +7,10 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+
+/// <summary>
+/// This shit is old
+/// </summary>
 namespace Assets.Scripts.Services
 {
     public class GameAdm : MonoBehaviour
@@ -63,7 +67,7 @@ namespace Assets.Scripts.Services
         {
             /*Node.AddComponent<Server>().ListeningPort = int.Parse(ServerFormPortInput.text);
             Node.AddComponent<Client>().clientPort = int.Parse(ServerFormPortInput.text);*/
-            Node.AddComponent<NetworkPeer>().ListeningPort = int.Parse(ServerFormPortInput.text);
+           // Node.AddComponent<NetworkPeer>().ListeningPort = int.Parse(ServerFormPortInput.text);
             ServerForm.SetActive(false);
             ClientForm.SetActive(true);
         }
