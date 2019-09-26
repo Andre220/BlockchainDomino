@@ -7,7 +7,7 @@ using UnityEngine.Networking;
 public interface INetworkServer
 {
     //Unity LLAPI network events 
-    event Action ConnectEvent;
+    event Action<LocalHostConnectionInfo> ConnectEvent;
     event Action DataReceiveEvent;
     event Action<int> DisconnectEvent;
     event Action BroadcastEvent;

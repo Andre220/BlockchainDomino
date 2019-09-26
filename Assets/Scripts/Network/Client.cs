@@ -40,29 +40,23 @@ public class Client : MonoBehaviour, INetworkClient
         hostId = NetworkTransport.AddHost(topo, 0);
     }
 
-    /*Connect and Disconnect*/
+    #region Connection and Disconnection
 
-    #region LocalHost Connection and Disconnection
-
-    public LocalHostConnectionInfo ConnectToLocalhostNode(int port)
+    public LocalHostConnectionInfo ConnectToLocalHostNode(int port)
     {
         int connectionID = NetworkTransport.Connect(hostId, "127.0.0.1", port, 0, out error);
 
-        //connectionsID.Add(connectionID);
-
-        LocalHostConnectionInfo localHostConnectionInfo = new LocalHostConnectionInfo
+        LocalHostConnectionInfo localHostConnectionInfo = new LocalHostConnectionInfo()
         {
             ConnectionID = connectionID,
             LocalhostPort = port,
             NickName = "Guest " + DateTime.Now
         };
 
-        //localHostConnectedNodes.Add(localHostConnectionInfo);
-
         return localHostConnectionInfo;
     }
 
-    public void ConnectToLocalhostNode(int port, string nickname)
+    public void ConnectToLocalHostNode(int port, string nickname)
     {
         int connectionID = NetworkTransport.Connect(hostId, "127.0.0.1", port, 0, out error);
 
@@ -97,10 +91,6 @@ public class Client : MonoBehaviour, INetworkClient
             Debug.LogError("Couldn`t disconnect user with connection ID " + connectionID + ". You should look better for what happened.");
         }
     }
-
-    #endregion
-
-    #region Connection and Disconnection
 
     #endregion
 

@@ -10,7 +10,6 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 {
     [Header("Forms Area")]
-
     //LoginForm
     public GameObject LoginForm;
     public Text UITextPort;
@@ -23,13 +22,15 @@ public class UIManager : MonoBehaviour
     [Header("Node Configuration")]
     [Space(30)]
     public GameObject Node;
-    public string NickName;
+    public string MyNickName;
 
     [Header("Prefabs")]
     [Space(30)]
     public GameObject NodeInfoPrefab;
     public Transform NodeInfoFather;
 
+    public GameObject ConnectionRequesrPrefab;
+    public Transform ConnectionRequestsFather;
 
     [Header("Others")]
     [Space(30)]
@@ -47,6 +48,9 @@ public class UIManager : MonoBehaviour
 
     INetworkClient _networkClientService;
     INetworkServer _networkServerService;
+
+    DominoAdm domino = new DominoAdm();
+
 
     void Start()
     {
@@ -66,79 +70,74 @@ public class UIManager : MonoBehaviour
 
     #region basic UI Function to enable and disable UI Objects
 
-        public void HelperEnableUIElement(GameObject UIElement)
-        {
-            UIElement.SetActive(true);
-        }
+    public void HelperEnableUIElement(GameObject UIElement)
+    {
+        UIElement.SetActive(true);
+    }
 
-        public void HelperDisableUIElement(GameObject UIElement)
-        {
-            UIElement.SetActive(false);
-        }
+    public void HelperDisableUIElement(GameObject UIElement)
+    {
+        UIElement.SetActive(false);
+    }
 
-        public void HelperSceneTitleChange(string newName)
-        {
-            TitleText.text = newName;
-        }
+    public void HelperSceneTitleChange(string newName)
+    {
+        TitleText.text = newName;
+    }
 
     #endregion
 
     #region Form voids
 
-    public void FormLogin(Text portText)
+    //Function used in Unity OnClick Events, exposed to be used in editor
+
+    public void UILoginForm(Text portText) //Called when player click in Login Button
     {
         SetupPeerServerAndClient(portText.text);
-    }
+    } 
 
-    public void FormSetupNickName(Text nickNameText)
+    public void UISetupNickName(Text nickNameText) // Called to setup player nickname
     {
         SetupNickName(nickNameText.text);
-    }
+    }  
 
-    public void FormConnectToPeer(Text peertToConnectPort) //Open form to connect to another player
+    public void UIConnectToPeer(Text peertToConnectPort) //Open form to connect to another player
     {
         ConnectToPeer(peertToConnectPort.text);
     }
 
-    public void FormConnectionEventAccepted() //Used in the button that player click the "accept" button in the connection Request Form
+    public void UIConnectionAccepted(LocalHostConnectionInfo lhci) //Used in the button that player click the "accept" button in the connection Request Form
     {
-        //Let's test the custom connection info workflow
-
-        //Add node to connected nodes form
+        SetupNodeListElement(lhci);
     }
 
-    public void FormSendPlayRequest(NodeInfo NI)
-    {
-        _networkClientService.SendMessageToLocalhostNode
-        (
-            new CustomNetworkMessageBase(CustomDataEventsEnum.PlayRequest, null),
-            NI.ConnectionID
-        );
-    }
-
-    public void FormConnectionEventDeclined() // Used in the button that player click the "Decline" button in the connection Request Form
+    public void UIConnectionDeclined() // Used in the button that player click the "Decline" button in the connection Request Form
     {
         ConnectionRequestForm.SetActive(false);
     }
 
-    private void FormAddPeerToUIList(LocalHostConnectionInfo lhci)
+    //public void UISendPlayRequest(NodeInfo NI)
+    //{
+    //    _networkClientService.SendMessageToLocalhostNode
+    //    (
+    //        new CustomNetworkMessageBase(CustomDataEventsEnum.PlayRequest, null),
+    //        NI.ConnectionID
+    //    );
+    //}
+
+    public void UIStartGame(NodeInfo NI) // Called when player click in another node in nodes list UI
     {
-        GameObject g = Instantiate(NodeInfoPrefab, NodeInfoFather);
+        //Create game info as P1 pieces and p2 pieces, pieces to buy and start piece
 
-        RectTransform rectTranform = g.GetComponent<RectTransform>();
+        GamePecas GP = domino.GamePecasForNetwork();
 
-        rectTranform.anchoredPosition = new Vector2(rectTranform.anchoredPosition.x, rectTranform.sizeDelta.y * NodeInfoFather.childCount);
+        //Send game info
 
-        NodeInfo NI = g.GetComponent<NodeInfo>();
+        CustomNetworkMessageBase gameStartMessage = new CustomNetworkMessageBase(CustomDataEventsEnum.PlayRequestAccept, GP);
 
-        g.GetComponent<Button>().onClick.AddListener(delegate() { FormSendPlayRequest(NI);});
+        //Change scene??
 
-        NI.ConnectionID = lhci.ConnectionID;
-        NI.LocalhostPort = lhci.LocalhostPort;
-        NI.NickName = lhci.NickName;
-        NI._server = _networkServerService;
     }
-
 
     #endregion
 
@@ -148,56 +147,61 @@ public class UIManager : MonoBehaviour
     {
         Node.AddComponent<Server>().serverPort = int.Parse(port);
         Node.AddComponent<Client>();
+
         _networkServerService = Node.GetComponent<Server>();
         _networkClientService = Node.GetComponent<Client>();
 
-        _networkServerService.ConnectEvent += ShowFormConnectionRequest;
-
-
-
-
-
-        //NEED TO BE FIXED BECAUSE THIS IS GAMBIARRA!
-        _networkServerService.PlayRequestEvent += ChangeScene;
-
-
-
-
-
-        //_networkServerService.DisconnectEvent += RemoverPeerFromPeerList;
-
-        //_networkServerService.ConnectEvent += ShowPlayRequestUI;
+        _networkServerService.ConnectEvent += ReceiveConnectionRequest;
     }
 
-    private void SetupNickName(string MyNickName)
+    private void SetupNickName(string UINickName)
     {
-        NickName = MyNickName;
+        MyNickName = UINickName;
     }
 
     private void ConnectToPeer(string peertToConnectPort)
     {
-        LocalHostConnectionInfo localHostConnectionInfo = _networkClientService.ConnectToLocalhostNode(int.Parse(peertToConnectPort));
-
-        FormAddPeerToUIList(localHostConnectionInfo);
+        LocalHostConnectionInfo localHostConnectionInfo = _networkClientService.ConnectToLocalHostNode(int.Parse(peertToConnectPort));
     }
 
-    private void ShowFormConnectionRequest()
+    private void ReceiveConnectionRequest(LocalHostConnectionInfo connectedNode)
     {
+        LocalHostConnectionInfo lhci = ConnectionRequestForm.GetComponent<LocalHostConnectionInfo>();
+        lhci.ConnectionID = connectedNode.ConnectionID;
+        lhci.LocalhostPort = connectedNode.LocalhostPort;
+        lhci.NickName = connectedNode.NickName;
+
         ConnectionRequestForm.SetActive(true);
     }
 
-    private void ChangeScene()
+    private void ChangeScene(int id)
     {
-        SceneManager.LoadScene(1, LoadSceneMode.Additive);
+        SceneManager.LoadScene(id, LoadSceneMode.Additive);
     }
 
     #endregion
 
-    public void ShowConnectionEventUI()
+    #region UI Setup Voids
+
+    private void SetupNodeListElement(LocalHostConnectionInfo lhci)
     {
-        ConnectionUI.SetActive(true);
-        _networkServerService.ConnectEvent -= ShowConnectionEventUI;
+        GameObject g = Instantiate(NodeInfoPrefab, NodeInfoFather);
+
+        RectTransform rectTranform = g.GetComponent<RectTransform>();
+
+        rectTranform.anchoredPosition = new Vector2(rectTranform.anchoredPosition.x, rectTranform.sizeDelta.y * NodeInfoFather.childCount);
+
+        NodeInfo NI = g.GetComponent<NodeInfo>();
+
+        g.GetComponent<Button>().onClick.AddListener(() => { UIStartGame(NI); });
+
+        NI.ConnectionID = lhci.ConnectionID;
+        NI.LocalhostPort = lhci.LocalhostPort;
+        NI.NickName = lhci.NickName;
+        NI._server = _networkServerService;
     }
+
+    #endregion
 
     public void SendDebugMessage(Text message)
     {
@@ -212,26 +216,4 @@ public class UIManager : MonoBehaviour
 
         _networkClientService.SendMessageToLocalhostNode(networkMessage, 1);
     }
-
-    /*public void ShowPlayRequestUI()
-    {
-        GamePlayUI.SetActive(true);
-        _networkServerService.ConnectionInfoEvent -= ShowPlayRequestUI;
-    }
-
-    public void PlayResquestAccept()
-    {
-        NetworkMessageBase message = new NetworkMessageBase(NetworkMessageType.PlayRequestResponse, true);
-        
-        _networkClientService.SendMessageToLocalhostNode(message, 1);
-
-        SceneManager.LoadScene(1, LoadSceneMode.Single);
-    }
-
-    public void PlayResquestDecline()
-    {
-        NetworkMessageBase message = new NetworkMessageBase(NetworkMessageType.PlayRequestResponse, false);
-
-        _networkClientService.SendMessageToLocalhostNode(message, 1);
-    }*/
 }

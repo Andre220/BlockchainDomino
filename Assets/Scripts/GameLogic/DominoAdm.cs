@@ -31,6 +31,11 @@ public class DominoAdm : MonoBehaviour
     public int ExtremidadeEsquerda;
     public int ExtremidadeDireita;
 
+    List<Peca> pecasGeradas = new List<Peca>();
+    GamePecas pecas = new GamePecas();
+
+    //public Peca[] pecas = new Peca[28];
+
 
     // Start is called before the first frame update
     void Start() //Needs to detect that i am the host or player
@@ -47,66 +52,6 @@ public class DominoAdm : MonoBehaviour
         DistribuirPecas();
 
         SortearPecaInicial();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
-    private void GerarBaralhoDePecas()
-    {
-        for (int i = 0; i <= 27; i++)
-        {
-            Peca p = new Peca();
-
-            GameObject g = Instantiate(PecaPrefab, BaralhoParaComprar);
-
-
-            if (i <= 6)
-            {
-                p.ValorA = 0;
-                p.ValorB = i;
-            }
-            else if (i > 6 && i <= 12)
-            {
-                p.ValorA = 1;
-                p.ValorB = i - 6;
-            }
-            else if (i > 12 && i <= 17)
-            {
-                p.ValorA = 2;
-                p.ValorB = i - 11;
-            }
-            else if (i > 17 && i <= 21)
-            {
-                p.ValorA = 3;
-                p.ValorB = i - 15;
-            }
-            else if (i > 21 && i <= 24)
-            {
-                p.ValorA = 4;
-                p.ValorB = i - 18;
-            }
-            else if (i > 25 && i <= 26)
-            {
-                p.ValorA = 5;
-                p.ValorB = i - 20;
-            }
-            else
-            {
-                p.ValorA = 6;
-                p.ValorB = 6;
-            }
-
-            g.GetComponent<Peca>().ValorA = p.ValorA;
-            g.GetComponent<Peca>().ValorB = p.ValorB;
-
-            //g.GetComponent<Peca>().gm = this;
-
-            Baralho.Add(g);
-        }
     }
 
     void DistribuirPecas()
@@ -222,4 +167,144 @@ public class DominoAdm : MonoBehaviour
         p.GetComponentInChildren<Button>().enabled = false;
     }
 
+
+    #region network Methods
+
+    private void GerarBaralhoDePecas()
+    {
+        for (int i = 0; i <= 27; i++)
+        {
+            Peca p = new Peca();
+
+            GameObject g = Instantiate(PecaPrefab, BaralhoParaComprar);
+
+
+            if (i <= 6)
+            {
+                p.ValorA = 0;
+                p.ValorB = i;
+            }
+            else if (i > 6 && i <= 12)
+            {
+                p.ValorA = 1;
+                p.ValorB = i - 6;
+            }
+            else if (i > 12 && i <= 17)
+            {
+                p.ValorA = 2;
+                p.ValorB = i - 11;
+            }
+            else if (i > 17 && i <= 21)
+            {
+                p.ValorA = 3;
+                p.ValorB = i - 15;
+            }
+            else if (i > 21 && i <= 24)
+            {
+                p.ValorA = 4;
+                p.ValorB = i - 18;
+            }
+            else if (i > 25 && i <= 26)
+            {
+                p.ValorA = 5;
+                p.ValorB = i - 20;
+            }
+            else
+            {
+                p.ValorA = 6;
+                p.ValorB = 6;
+            }
+
+            g.GetComponent<Peca>().ValorA = p.ValorA;
+            g.GetComponent<Peca>().ValorB = p.ValorB;
+
+            Baralho.Add(g);
+        }
+    }
+
+
+    public GamePecas GamePecasForNetwork()
+    {
+        GamePecas result = new GamePecas();
+
+        DistribuirPecasEntreJogadores(result);
+
+        SortearInicial(result);
+
+        return result;
+    }
+
+    private void GerarPecas()
+    {
+        for (int i = 0; i <= 27; i++)
+        {
+            Peca p = new Peca();
+
+            if (i <= 6)
+            {
+                p.ValorA = 0;
+                p.ValorB = i;
+            }
+            else if (i > 6 && i <= 12)
+            {
+                p.ValorA = 1;
+                p.ValorB = i - 6;
+            }
+            else if (i > 12 && i <= 17)
+            {
+                p.ValorA = 2;
+                p.ValorB = i - 11;
+            }
+            else if (i > 17 && i <= 21)
+            {
+                p.ValorA = 3;
+                p.ValorB = i - 15;
+            }
+            else if (i > 21 && i <= 24)
+            {
+                p.ValorA = 4;
+                p.ValorB = i - 18;
+            }
+            else if (i > 25 && i <= 26)
+            {
+                p.ValorA = 5;
+                p.ValorB = i - 20;
+            }
+            else
+            {
+                p.ValorA = 6;
+                p.ValorB = 6;
+            }
+
+            pecasGeradas.Add(p);
+        }
+    }
+
+    void DistribuirPecasEntreJogadores(GamePecas gp)
+    {
+        for (int i = 0; i < 14; i++)
+        {
+            int choosed = UnityEngine.Random.Range(0, pecasGeradas.Count);
+
+            if (i < 7)//Setando baralho do player 01
+            {
+                gp.playerAPecas[choosed] = pecasGeradas[i];
+            }
+            else//Setando baralho do player 02
+            {
+                gp.playerBPecas[choosed] = pecasGeradas[i];
+            }
+
+            pecasGeradas.RemoveAt(choosed);
+        }
+    }
+
+    void SortearInicial(GamePecas gp)
+    {
+        int choosed = UnityEngine.Random.Range(0, pecasGeradas.Count);
+        gp.pecaInicial = pecasGeradas[choosed];
+        gp.pecaInicial.GetComponentInChildren<Button>().enabled = false;
+    }
+
+     #endregion
 }

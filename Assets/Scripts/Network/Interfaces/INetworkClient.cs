@@ -6,9 +6,9 @@ public interface INetworkClient
 {
     //void ConnectToLocalhostNode(int port);
 
-    LocalHostConnectionInfo ConnectToLocalhostNode(int port);
+    LocalHostConnectionInfo ConnectToLocalHostNode(int port);
 
-    void ConnectToLocalhostNode(int port, string nickname);
+    void ConnectToLocalHostNode(int port, string nickname);
 
     void DisconnectFromLocalhostNode(int connectionID);
 

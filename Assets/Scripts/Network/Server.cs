@@ -16,7 +16,7 @@ public class Server : MonoBehaviour, INetworkServer
     //public static Server instance = null;
 
     //Unity LLAPI basic network message typs
-    public event Action ConnectEvent;
+    public event Action<LocalHostConnectionInfo> ConnectEvent;
     public event Action DataReceiveEvent;
     public event Action<int> DisconnectEvent;
     public event Action BroadcastEvent;
@@ -100,16 +100,20 @@ public class Server : MonoBehaviour, INetworkServer
 
     public void OnConnectEvent(int hostId, int connectionId, NetworkError error)
     {
-        ConnectEvent?.Invoke();
-
         connectionsID.Add(connectionId);
 
-        LocalHostKnowNodes.Add(new LocalHostConnectionInfo
+        LocalHostConnectionInfo connectedNode = new LocalHostConnectionInfo
         {
             ConnectionID = connectionId,
             LocalhostPort = hostId,
             NickName = "Guest" + DateTime.Now
-        });
+        };
+
+        //Adding guest node that will update his info when his info come
+        //UPDATE: CHANGING THE LOGIC, THIS STILL NECESSARY?
+        LocalHostKnowNodes.Add(connectedNode);
+
+        ConnectEvent?.Invoke(connectedNode);
 
         print("|Connection event: " +
             " |HostId: " + hostId + 
