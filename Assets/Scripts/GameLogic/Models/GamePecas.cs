@@ -4,11 +4,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
-public class GamePecas : MonoBehaviour
+public class GamePecas
 {
-    public Peca[] playerAPecas = new Peca[7];
-    public Peca[] playerBPecas = new Peca[7];
-    public Peca[] pecasParaComprar = new Peca[13];
+    public List<Peca> playerAPecas = new List<Peca>(7);
+    public List<Peca> playerBPecas = new List<Peca>(7);
+    public List<Peca> pecasParaComprar = new List<Peca>(13);
 
     public Peca pecaInicial;
 }

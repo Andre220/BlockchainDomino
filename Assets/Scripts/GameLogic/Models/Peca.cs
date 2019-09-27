@@ -10,6 +10,7 @@ using UnityEngine.UI;
 /// |   B   |
 /// |_______|
 /// </summary>
+
 public class Peca : MonoBehaviour
 {
     public DominoAdm dominoAdm;

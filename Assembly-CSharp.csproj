@@ -68,7 +68,6 @@
     <Compile Include="Assets\Scripts\Blockchain\Models\Block.cs" />
     <Compile Include="Assets\Scripts\Blockchain\Models\Transaction.cs" />
     <Compile Include="Assets\Scripts\GameLogic\DominoAdm.cs" />
-    <Compile Include="Assets\Scripts\GameLogic\GameAdm.cs" />
     <Compile Include="Assets\Scripts\GameLogic\Models\GamePecas.cs" />
     <Compile Include="Assets\Scripts\GameLogic\Models\NodeInfo.cs" />
     <Compile Include="Assets\Scripts\GameLogic\Models\Peca.cs" />

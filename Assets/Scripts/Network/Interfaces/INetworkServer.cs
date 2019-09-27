@@ -15,6 +15,8 @@ public interface INetworkServer
     //Domino Custom events
     event Action PlayRequestEvent;
 
+    event Action<GamePecas, int> PlayRequestAccept;
+
 
     List<LocalHostConnectionInfo> LocalHostKnowNodes { get; set; }
 

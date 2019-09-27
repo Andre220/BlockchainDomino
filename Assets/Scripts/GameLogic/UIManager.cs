@@ -9,46 +9,46 @@ using UnityEngine.UI;
 /// </summary>
 public class UIManager : MonoBehaviour
 {
-    [Header("Forms Area")]
-    //LoginForm
+    #region public property`s
+    [Header("Node Data")]
+    public GameObject Node;
+    public string MyNickName;
+
+    [Header("Login Form")]
+    [Space(50)]
     public GameObject LoginForm;
     public Text UITextPort;
     public Text UITextNickName;
 
+    [Header("Login Form")]
+    [Space(50)]
     public GameObject LobbyForm;
-
     public GameObject ConnectionRequestForm;
-
-    [Header("Node Configuration")]
-    [Space(30)]
-    public GameObject Node;
-    public string MyNickName;
 
     [Header("Prefabs")]
     [Space(30)]
     public GameObject NodeInfoPrefab;
-    public Transform NodeInfoFather;
-
     public GameObject ConnectionRequesrPrefab;
-    public Transform ConnectionRequestsFather;
+
+    [Header("Transforms")]
+    [Space(30)]
+    public Transform NodeInfoFatherTransform;
+    public Transform ConnectionRequestsFatherTransform;
 
     [Header("Others")]
     [Space(30)]
-    public Text TitleText;
+    public Text SceneTitleText;
 
-    public Transform OnlineNodesFather;
-    public GameObject PeerInfoPrefab;
+    #endregion
 
-    public GameObject ConnectionUI;
-    public GameObject LocalHostPlayerConnectionRequest;
-
-    public GameObject GamePlayUI;
-
-    public GameObject GameUI;
+    #region private property`s
 
     INetworkClient _networkClientService;
     INetworkServer _networkServerService;
 
+    #endregion
+    
+    //REVER
     DominoAdm domino = new DominoAdm();
 
 
@@ -58,8 +58,11 @@ public class UIManager : MonoBehaviour
         {
             if (GameObject.Find("Node") == null)
             {
-                //Instantiate the gameObject. Actually i will drop error, whatever ...
-                Debug.LogError("Node object isn`t created. Please create a gameObject with the name \"Node\".");
+                GameObject node = new GameObject();
+                Node.name = "Node";
+                Instantiate(Node);
+
+                Node = node;
             }
             else
             {
@@ -82,7 +85,7 @@ public class UIManager : MonoBehaviour
 
     public void HelperSceneTitleChange(string newName)
     {
-        TitleText.text = newName;
+        SceneTitleText.text = newName;
     }
 
     #endregion
@@ -116,15 +119,6 @@ public class UIManager : MonoBehaviour
         ConnectionRequestForm.SetActive(false);
     }
 
-    //public void UISendPlayRequest(NodeInfo NI)
-    //{
-    //    _networkClientService.SendMessageToLocalhostNode
-    //    (
-    //        new CustomNetworkMessageBase(CustomDataEventsEnum.PlayRequest, null),
-    //        NI.ConnectionID
-    //    );
-    //}
-
     public void UIStartGame(NodeInfo NI) // Called when player click in another node in nodes list UI
     {
         //Create game info as P1 pieces and p2 pieces, pieces to buy and start piece
@@ -135,8 +129,13 @@ public class UIManager : MonoBehaviour
 
         CustomNetworkMessageBase gameStartMessage = new CustomNetworkMessageBase(CustomDataEventsEnum.PlayRequestAccept, GP);
 
-        //Change scene??
+        _networkClientService.SendMessageToLocalhostNode(gameStartMessage, NI.ConnectionID);
 
+        //Change scene?? Fuck it, i will start the game ...
+
+        domino.DominoPrint(GP, 0);
+
+        _networkServerService.PlayRequestAccept += domino.DominoPrint;
     }
 
     #endregion
@@ -185,11 +184,11 @@ public class UIManager : MonoBehaviour
 
     private void SetupNodeListElement(LocalHostConnectionInfo lhci)
     {
-        GameObject g = Instantiate(NodeInfoPrefab, NodeInfoFather);
+        GameObject g = Instantiate(NodeInfoPrefab, NodeInfoFatherTransform);
 
         RectTransform rectTranform = g.GetComponent<RectTransform>();
 
-        rectTranform.anchoredPosition = new Vector2(rectTranform.anchoredPosition.x, rectTranform.sizeDelta.y * NodeInfoFather.childCount);
+        rectTranform.anchoredPosition = new Vector2(rectTranform.anchoredPosition.x, rectTranform.sizeDelta.y * NodeInfoFatherTransform.childCount);
 
         NodeInfo NI = g.GetComponent<NodeInfo>();
 

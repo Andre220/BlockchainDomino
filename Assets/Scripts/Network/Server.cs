@@ -1,5 +1,4 @@
-﻿using Assets.Scripts.Services;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -24,7 +23,7 @@ public class Server : MonoBehaviour, INetworkServer
     // public event Action ConnectionInfoEvent;
 
     public event Action PlayRequestEvent;
-    public event Action PlayRequestResponseAcceptEvent;
+    public event Action<GamePecas, int> PlayRequestAccept;
 
     private const int MAX_CONNECTION = 20;
 
@@ -138,7 +137,7 @@ public class Server : MonoBehaviour, INetworkServer
                 PlayRequestEvent?.Invoke();
                 break;
             case CustomDataEventsEnum.PlayRequestAccept:
-                PlayRequestResponseAcceptEvent?.Invoke();
+                PlayRequestAccept?.Invoke((GamePecas)message.MessageObj, 1);
                 break;
             case CustomDataEventsEnum.PlayRequestDecline:
                 //OnPlayRequestResponseEvent();

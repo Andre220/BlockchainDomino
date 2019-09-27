@@ -167,6 +167,23 @@ public class DominoAdm : MonoBehaviour
         p.GetComponentInChildren<Button>().enabled = false;
     }
 
+    public void DominoPrint(GamePecas GamePecas, int playerID)
+    {
+        if (playerID == 0)
+        {
+            foreach (Peca p in GamePecas.playerAPecas)
+            {
+                print($"Player {playerID} pecas: A = {p.ValorA} | B = {p.ValorB}");
+            }
+        }
+        else
+        {
+            foreach (Peca p in GamePecas.playerBPecas)
+            {
+                print($"Player {playerID} pecas: A = {p.ValorA} | B = {p.ValorB}");
+            }
+        }
+    }
 
     #region network Methods
 
@@ -222,10 +239,11 @@ public class DominoAdm : MonoBehaviour
         }
     }
 
-
     public GamePecas GamePecasForNetwork()
     {
         GamePecas result = new GamePecas();
+
+        GerarPecas();
 
         DistribuirPecasEntreJogadores(result);
 
