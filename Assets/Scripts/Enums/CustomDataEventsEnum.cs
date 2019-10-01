@@ -1,4 +1,8 @@
-﻿public enum CustomDataEventsEnum
+﻿/// <summary>
+/// 
+/// </summary>
+
+public enum CustomDataEventsEnum
 {
     ConnectionInfoRequest = 0,
     PlayRequest = 1,

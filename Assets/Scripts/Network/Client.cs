@@ -100,7 +100,14 @@ public class Client : MonoBehaviour, INetworkClient
     {
         string messageBaseObjectJson = JsonConvert.SerializeObject(messageBaseObject);
         byte[] buffer = Encoding.Unicode.GetBytes(messageBaseObjectJson);
-        NetworkTransport.Send(hostId, ConnectionID, unreliableChannel, buffer, messageBaseObjectJson.Length * sizeof(char), out error);
+
+        /* CustomNetworkMessageBase mess = new CustomNetworkMessageBase(CustomDataEventsEnum.ConnectionInfoRequest, "Teste");
+
+        string messageTeste = JsonConvert.SerializeObject(mess);
+        byte[] buffer2 = Encoding.Unicode.GetBytes(messageTeste); */
+
+
+        NetworkTransport.Send(hostId, ConnectionID, reliableChannel, buffer, messageBaseObjectJson.Length * sizeof(char), out error);
     }
 
     /*public void sendMessageToConnectedNodes(string MessageToStream)

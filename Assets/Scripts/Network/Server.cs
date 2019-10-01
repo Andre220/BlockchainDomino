@@ -67,8 +67,8 @@ public class Server : MonoBehaviour, INetworkServer
         int recHostId;
         int connectionId;
         int channelId;
-        byte[] recBuffer = new byte[178];
-        int bufferSize = 178;
+        byte[] recBuffer = new byte[32768];
+        int bufferSize = 32768;
         int dataSize;
         byte error;
 

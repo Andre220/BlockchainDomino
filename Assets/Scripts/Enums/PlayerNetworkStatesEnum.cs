@@ -8,7 +8,7 @@
 /// 
 /// </summary>
 
-public enum PlayerNetworkStateEnum
+public enum PlayerNetworkStatesEnum
 {
     Logged = 0,
     WaitingForPlayRequest = 1,
