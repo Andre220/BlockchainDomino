@@ -8,7 +8,8 @@ public enum CustomDataEventsEnum
     PlayRequest = 1,
     PlayRequestAccept = 2,
     PlayRequestDecline = 3,
-    PlayerMove = 4,
-    PlayerWinMove = 5,
-    RequestPlayerState = 6,
+    AdversaryConfigurationResponse = 4,
+    PlayerMove = 5,
+    PlayerWinMove = 6,
+    RequestPlayerState = 7,
 }

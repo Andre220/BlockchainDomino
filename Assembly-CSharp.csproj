@@ -81,6 +81,7 @@
     <Compile Include="Assets\Scripts\Network\Interfaces\INetworkManager.cs" />
     <Compile Include="Assets\Scripts\Network\Interfaces\INetworkServer.cs" />
     <Compile Include="Assets\Scripts\Network\Models\CustomNetworkMessageBase.cs" />
+    <Compile Include="Assets\Scripts\Network\Models\GlobalNetworkConfig.cs" />
     <Compile Include="Assets\Scripts\Network\Models\LocalHostConnectionInfo.cs" />
     <Compile Include="Assets\Scripts\Network\NetworkManager.cs" />
     <Compile Include="Assets\Scripts\Network\Server.cs" />

@@ -5,9 +5,11 @@ using UnityEngine;
 
 public interface INetworkManager
 {
-    void SetupPeerServerAndClient(string port, GameObject Node, Action<LocalHostConnectionInfo> SetupUIElement);
+    void SetupPeerServerAndClient(string port, GameObject Node, string NickName, Action<LocalHostConnectionInfo> SetupUIElement);
 
-    void ConnectToPeer(string peertToConnectPort);
+    LocalHostConnectionInfo ConnectToPeer(string peertToConnectPort);
 
     void SendCustomMessage(CustomNetworkMessageBase message, LocalHostConnectionInfo lhci);
+
+    void GameDataReceived(Action<GamePecas, int, LocalHostConnectionInfo> gamePecas);
 }

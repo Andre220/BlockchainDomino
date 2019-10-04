@@ -10,7 +10,7 @@ public class UILocalHostConnectionInfo : MonoBehaviour
     public INetworkServer _server;
 
     public Text UI_ConnectionID;
-    public Text UI_LocalhostPort;
+    public Text UI_hostID;
     public Text UI_NickName;
 
     public LocalHostConnectionInfo localHostConnectionInfoModel;
@@ -29,15 +29,15 @@ public class UILocalHostConnectionInfo : MonoBehaviour
 
     void OnEnable()
     {
-        //SetupUIGameObject();
+        SetupUIGameObject();
     }
 
     public void SetupUIGameObject()
     {
         if (localHostConnectionInfoModel != null)
         {
-            UI_ConnectionID.text = "CID:" + localHostConnectionInfoModel.ConnectionID.ToString();
-            UI_LocalhostPort.text = "Port:" + localHostConnectionInfoModel.LocalhostPort.ToString();
+            UI_ConnectionID.text = localHostConnectionInfoModel.ConnectionID.ToString();
+            UI_hostID.text = localHostConnectionInfoModel.HostId.ToString();
             UI_NickName.text = localHostConnectionInfoModel.NickName;
         }
     }

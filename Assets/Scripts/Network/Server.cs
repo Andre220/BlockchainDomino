@@ -23,7 +23,9 @@ public class Server : MonoBehaviour, INetworkServer
     // public event Action ConnectionInfoEvent;
 
     public event Action PlayRequestEvent;
-    public event Action<GamePecas, int> PlayRequestAccept;
+    public event Action<GamePecas, int, LocalHostConnectionInfo> PlayRequestAccept;
+
+    public event Action EnemyReady;
 
     private const int MAX_CONNECTION = 20;
 
@@ -51,6 +53,9 @@ public class Server : MonoBehaviour, INetworkServer
         NetworkTransport.Init();
         ConnectionConfig cc = new ConnectionConfig();
 
+        cc.PacketSize = GlobalNetworkConfig.GlobalPacketSize;
+        cc.FragmentSize = GlobalNetworkConfig.GlobalFragmentSize;
+
         reliableChannel = cc.AddChannel(QosType.Reliable);
         unreliableChannel = cc.AddChannel(QosType.Unreliable);
 
@@ -58,8 +63,9 @@ public class Server : MonoBehaviour, INetworkServer
 
         hostId = NetworkTransport.AddHost(topo, serverPort, null);// the ip is null because we are at localhost - i should test it with 127.0.0.1 to see how it behave
 
-        LocalHostKnowNodes = new List<LocalHostConnectionInfo>();
+        GlobalNetworkConfig.ThisNodeInfo.HostId = hostId;
 
+        LocalHostKnowNodes = new List<LocalHostConnectionInfo>();
     }
 
     void LocalHostServer()
@@ -67,31 +73,38 @@ public class Server : MonoBehaviour, INetworkServer
         int recHostId;
         int connectionId;
         int channelId;
-        byte[] recBuffer = new byte[32768];
-        int bufferSize = 32768;
+        byte[] recBuffer = new byte[2500];
+        int bufferSize = 2500;
         int dataSize;
         byte error;
 
         NetworkEventType recData = NetworkTransport.Receive(out recHostId, out connectionId, out channelId, recBuffer, bufferSize, out dataSize, out error);
 
-        switch (recData)
+        if ((NetworkError)error != NetworkError.Ok)
         {
-            case NetworkEventType.Nothing:
-                break;
+            Debug.LogError((NetworkError)error);
+        }
+        else
+        {
+            switch (recData)
+            {
+                case NetworkEventType.Nothing:
+                    break;
 
-            case NetworkEventType.ConnectEvent:
-                OnConnectEvent(recHostId, connectionId, (NetworkError)error);
-                break;
+                case NetworkEventType.ConnectEvent:
+                    OnConnectEvent(recHostId, connectionId, (NetworkError)error);
+                    break;
 
-            case NetworkEventType.DataEvent:
-                OnDataReceiveEvent(recHostId, connectionId, recBuffer, (NetworkError)error);
-                break;
+                case NetworkEventType.DataEvent:
+                    OnDataReceiveEvent(recHostId, connectionId, recBuffer, (NetworkError)error);
+                    break;
 
-            case NetworkEventType.DisconnectEvent:
-                OnDisconnectEvent(recHostId, connectionId, (NetworkError)error);
-                break;
-            case NetworkEventType.BroadcastEvent:
-                break;
+                case NetworkEventType.DisconnectEvent:
+                    OnDisconnectEvent(recHostId, connectionId, (NetworkError)error);
+                    break;
+                case NetworkEventType.BroadcastEvent:
+                    break;
+            }
         }
     }
 
@@ -103,8 +116,8 @@ public class Server : MonoBehaviour, INetworkServer
 
         LocalHostConnectionInfo connectedNode = new LocalHostConnectionInfo
         {
+            HostId = hostId,
             ConnectionID = connectionId,
-            LocalhostPort = hostId,
             NickName = "Guest" + DateTime.Now
         };
 
@@ -128,7 +141,7 @@ public class Server : MonoBehaviour, INetworkServer
 
         CustomNetworkMessageBase message = JsonConvert.DeserializeObject<CustomNetworkMessageBase>(JsonText);
 
-        switch (message.messageType)
+        switch (message.MessageType)
         {
             case CustomDataEventsEnum.ConnectionInfoRequest: // Get connection info and save in connections pool
                 //OnConnectionInfoEvent(hostId, connectionId, message, buffer, error);
@@ -137,10 +150,15 @@ public class Server : MonoBehaviour, INetworkServer
                 PlayRequestEvent?.Invoke();
                 break;
             case CustomDataEventsEnum.PlayRequestAccept:
-                PlayRequestAccept?.Invoke((GamePecas)message.MessageObj, 1);
+                //Every time that you receive a game request, you are the player 2 (index 1) and with that index the correct pieces will be show to you
+                PlayRequestAccept?.Invoke((GamePecas)message.MessageObj, 1, (LocalHostConnectionInfo)message.SenderInfo);
                 break;
             case CustomDataEventsEnum.PlayRequestDecline:
                 //OnPlayRequestResponseEvent();
+                break;
+            case CustomDataEventsEnum.AdversaryConfigurationResponse:
+                Debug.Log("Adversary Accepted");
+                EnemyReady?.Invoke();
                 break;
             case CustomDataEventsEnum.PlayerMove: // call event to deal with this event and every gameplay script who sould know about network info should do your action
 

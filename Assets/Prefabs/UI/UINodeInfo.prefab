@@ -297,12 +297,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27eb96dc3476d3e4584e66e349944080, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ConnectionID: 0
-  LocalhostPort: 0
-  NickName: 
   UI_ConnectionID: {fileID: 8356698536529004967}
-  UI_LocalhostPort: {fileID: 8356698537688694399}
+  UI_hostID: {fileID: 8356698537688694399}
   UI_NickName: {fileID: 8747776216656586475}
+  localHostConnectionInfoModel:
+    HostId: 0
+    ConnectionID: 0
+    NickName: 
 --- !u!1 &8356698537606309613
 GameObject:
   m_ObjectHideFlags: 0
@@ -389,7 +390,7 @@ GameObject:
   - component: {fileID: 8356698537688694396}
   - component: {fileID: 8356698537688694399}
   m_Layer: 5
-  m_Name: Port
+  m_Name: HostId
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

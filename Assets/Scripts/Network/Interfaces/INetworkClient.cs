@@ -14,5 +14,5 @@ public interface INetworkClient
 
     //void BroadcastMessageToLocalHostNodes(CustomNetworkMessageBase messageBaseObject, List<int> ConnectionIDList);
 
-    void SendMessageToLocalhostNode(CustomNetworkMessageBase messageBaseObject, int ConnectionID);
+    void SendMessageToLocalhostNode(CustomNetworkMessageBase messageBaseObject, LocalHostConnectionInfo ConnectionID);
 }

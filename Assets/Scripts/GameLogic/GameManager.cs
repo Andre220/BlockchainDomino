@@ -7,7 +7,11 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
-    public Transform TabuleiroDoGame;
+    public Camera mainCamera;
+
+    public GameObject LobbyCanvas;
+
+    /*public Transform TabuleiroDoGame;
     public Transform BaralhoParaComprar;
     public Transform PlayerBaralho;
     public Transform OponenteBaralho;
@@ -21,9 +25,12 @@ public class GameManager : MonoBehaviour
     public List<GameObject> Baralho;
 
     public int ExtremidadeEsquerda;
-    public int ExtremidadeDireita;
+    public int ExtremidadeDireita;*/
+
+    public GameObject GameForm;
 
     List<Peca> pecasGeradas = new List<Peca>();
+
     GamePecas pecas = new GamePecas();
 
     void Start()
@@ -33,6 +40,8 @@ public class GameManager : MonoBehaviour
             instance = this;
         else
             Destroy(this);
+
+        //_networkManager.EnemyReady(SincronizeGameAndStart);
     } 
 
     #region network Methods
@@ -48,6 +57,8 @@ public class GameManager : MonoBehaviour
         SortearInicial(result);
 
         result.pecasParaComprar = pecasGeradas;
+
+        GlobalNetworkConfig._networkManager.GameDataReceived(IniciarJogo);
 
         return result;
     }
@@ -118,7 +129,7 @@ public class GameManager : MonoBehaviour
             pecasGeradas.RemoveAt(choosed);
         }
     }
-
+      
     void SortearInicial(GamePecas gp)
     {
         int choosed = UnityEngine.Random.Range(0, pecasGeradas.Count);
@@ -243,4 +254,36 @@ public class GameManager : MonoBehaviour
         ////p.transform.SetParent(TabuleiroDoGame);
         ////p.GetComponentInChildren<Button>().enabled = false;
     }
+
+    #region Start game Methods
+
+    void IniciarJogo(GamePecas pecasRecebidas, int playerID, LocalHostConnectionInfo senderData)
+    {
+        montarBaralho(pecasRecebidas, playerID);
+
+        CustomNetworkMessageBase message = new CustomNetworkMessageBase(CustomDataEventsEnum.AdversaryConfigurationResponse, true);
+
+        LocalHostConnectionInfo lhci = new LocalHostConnectionInfo
+        {
+            ConnectionID = senderData.ConnectionID,
+            HostId = senderData.HostId,
+            NickName = senderData.NickName
+        };
+
+        GlobalNetworkConfig._networkManager.SendCustomMessage(message, lhci);
+    }
+
+    void SincronizeGameAndStart()
+    {
+
+    }
+
+    void montarBaralho(GamePecas pecasRecebidas, int playerID)
+    {
+        mainCamera.backgroundColor = Color.Lerp(mainCamera.backgroundColor, new Color(179, 86, 92), Time.deltaTime * 2);
+
+        LobbyCanvas.SetActive(false);
+    }
+
+    #endregion
 }

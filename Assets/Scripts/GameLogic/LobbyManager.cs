@@ -21,10 +21,12 @@ public class LobbyManager : MonoBehaviour
     public Text UITextPort;
     public Text UITextNickName;
 
-    [Header("Login Form")]
+    [Header("Lobby Form")]
     [Space(50)]
     public GameObject LobbyForm;
     public GameObject ConnectionRequestForm;
+    public GameObject WaitingAdversaryResponseForm;
+
 
     [Header("Prefabs")]
     [Space(30)]
@@ -44,13 +46,11 @@ public class LobbyManager : MonoBehaviour
 
     #region private property`s
 
-    INetworkManager _networkManager;
-
     #endregion
 
     void Start()
     {
-        _networkManager = new NetworkManager();
+        GlobalNetworkConfig._networkManager = new NetworkManager();
 
         if (Node == null)
         {
@@ -92,8 +92,8 @@ public class LobbyManager : MonoBehaviour
 
     public void UIButtonLogin(Text portText) //Called when player click in Login Button
     {
-        _networkManager.SetupPeerServerAndClient(portText.text, Node, ReceiveConnectionRequest);
-    } 
+        GlobalNetworkConfig._networkManager.SetupPeerServerAndClient(portText.text, Node, MyNickName, ReceiveConnectionRequest);
+    }
 
     public void SetupNickName(Text nickNameText) // Called to setup player nickname
     {
@@ -102,13 +102,8 @@ public class LobbyManager : MonoBehaviour
 
     public void UIButtonConnectToPeer(Text peertToConnectPort) //Open form to connect to another player
     {
-        _networkManager.ConnectToPeer(peertToConnectPort.text);
+        GlobalNetworkConfig._networkManager.ConnectToPeer(peertToConnectPort.text);
     }
-
-    //public void UIConnectionAcceptedButton(LocalHostConnectionInfo lhci) //Used in the button that player click the "accept" button in the connection Request Form
-    //{
-    //    SetupNodeListElement(lhci);
-    //}
 
     #endregion
 
@@ -133,15 +128,16 @@ public class LobbyManager : MonoBehaviour
         //Send game info
 
         CustomNetworkMessageBase gameStartMessage = new CustomNetworkMessageBase(CustomDataEventsEnum.PlayRequestAccept, GP);
-        //CustomNetworkMessageBase gameStartMessage = new CustomNetworkMessageBase(CustomDataEventsEnum.PlayRequestAccept, "Testing the issue");
 
-        //CustomNetworkMessageBase gameStartMessage = new CustomNetworkMessageBase(CustomDataEventsEnum.PlayRequestAccept, gp2);
+        //Custom Message  //To who you want to send
+        GlobalNetworkConfig._networkManager.SendCustomMessage(gameStartMessage, GlobalNetworkConfig.ThisNodeInfo);
 
-        _networkManager.SendCustomMessage(gameStartMessage, NI.localHostConnectionInfoModel);
+        WaitingAdversaryResponseForm.SetActive(true);
 
         //StartTheGame
 
-        GameManager.instance.DominoPrint(GP, 0);
+        /*//Debug Call
+        GameManager.instance.DominoPrint(GP, 0);*/
 
         //_networkServerService.PlayRequestAccept += domino.DominoPrint;
     }
@@ -173,7 +169,7 @@ public class LobbyManager : MonoBehaviour
             CustomDataEventsEnum.ConnectionInfoRequest, new LocalHostConnectionInfo
             {
                 ConnectionID = -1,
-                LocalhostPort = 00000,
+                HostId = 00000,
                 NickName = "Tester"
             }
         );

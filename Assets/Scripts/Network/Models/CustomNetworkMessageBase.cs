@@ -6,12 +6,21 @@ using UnityEngine;
 [Serializable]
 public class CustomNetworkMessageBase
 {
-    public CustomDataEventsEnum messageType;
+    public LocalHostConnectionInfo SenderInfo;
+    public CustomDataEventsEnum MessageType;
     public object MessageObj;
 
     public CustomNetworkMessageBase(CustomDataEventsEnum type, object messageObj)
     {
-        messageType = type;
+        MessageType = type;
         MessageObj = messageObj;
+        SenderInfo = GlobalNetworkConfig.ThisNodeInfo;
     }
+
+    //public CustomNetworkMessageBase(CustomDataEventsEnum type, object messageObj, LocalHostConnectionInfo  senderInfo)
+    //{
+    //    MessageType = type;
+    //    MessageObj = messageObj;
+    //    SenderInfo = senderInfo;
+    //} //i think that i can use the global config instance to setup this connectionData
 }
