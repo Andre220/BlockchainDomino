@@ -102,8 +102,8 @@ public class Client : MonoBehaviour, INetworkClient
 
     public void SendMessageToLocalhostNode(CustomNetworkMessageBase messageBaseObject, LocalHostConnectionInfo lhci)
     {
-        //string messageBaseObjectJson = JsonConvert.SerializeObject(messageBaseObject);
-        //byte[] buffer = Encoding.Unicode.GetBytes(messageBaseObjectJson);
+        string messageBaseObjectJson = JsonConvert.SerializeObject(messageBaseObject);
+        byte[] buffer = Encoding.Unicode.GetBytes(messageBaseObjectJson);
 
         CustomNetworkMessageBase mess = new CustomNetworkMessageBase(CustomDataEventsEnum.ConnectionInfoRequest, "Teste");
 
