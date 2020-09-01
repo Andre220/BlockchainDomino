@@ -1,6 +1,6 @@
 # BlockchainDomino
 
-Protótipo do meu projeto de TCC. Comecei o projeto neste repositório e, após esbarrar em um erro na biblioteca Unet cujo qual não consegui resolver e/ou encontrar solução nos fóruns, movi para o repositório ![TCCBlockchainDomino](https://github.com/Andre220/TCCBlockchainDomino), onde fui inserindo cada função e cada script manualmente até que o projeto voltasse a funcionar.
+Protótipo do meu projeto de TCC. Comecei o projeto neste repositório e, após esbarrar em um erro na biblioteca Unet cujo qual não consegui resolver e/ou encontrar solução nos fóruns, movi para o repositório [TCCBlockchainDomino](https://github.com/Andre220/TCCBlockchainDomino), onde fui inserindo cada função e cada script manualmente até que o projeto voltasse a funcionar.
 
   #### Plataforma
   Microsoft Windows
